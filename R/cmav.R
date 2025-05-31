@@ -81,8 +81,21 @@ cmav <- function(y,ma=NULL,fill=c(TRUE,FALSE),outplot=c(FALSE,TRUE),fast=c(TRUE,
         cma[(mlbounds[2]+1):n] <- as.vector(forecast::forecast.ets(fit,h=(n-mlbounds[2]))$mean)
       }
       if ((mlbounds[1]-1) >= 1){
-        cma[1:(mlbounds[1]-1)] <- rev(as.vector(forecast::forecast.ets(forecast::ets(rev(cma[mlbounds[1]:mlbounds[2]]),
-                                                             fit,use.initial.values=FALSE),h=(mlbounds[1]-1))$mean))
+        # In rare cases there can be an error in the estimation of the forecast package
+        cma[1:(mlbounds[1]-1)] <- tryCatch({
+          rev(as.vector(forecast::forecast.ets(forecast::ets(rev(cma[mlbounds[1]:mlbounds[2]]),
+                                                             fit,use.initial.values=FALSE),
+                                               h=(mlbounds[1]-1))$mean))
+        }, error = function(e) {
+          if (grepl("Unable to estimate a model", e$message)) {
+            # Fallback to full model search
+            warning("Unable to estimate fast model, revert to full model search")
+            rev(as.vector(forecast::forecast.ets(forecast::ets(rev(cma[(mlbounds[1]:mlbounds[2])]),
+                                                               model="ZZN"),h=(mlbounds[1]-1))$mean))
+          } else {
+            stop(e)
+          }
+        })
       }
     }
   }

@@ -1,3 +1,6 @@
+# VERSION 0.9.5 (31 May 2025)
+- Fix for cmav
+
 # VERSION 0.9.4 (12 Nov 2023)
 - Fix for seasplot graphs
 - Fix for tsutils.Rd
